@@ -17,6 +17,9 @@ sem_t readSem, writeSem; /* semaphores */
 void *reader_thread(void *arg);
 void *writer_thread(void *arg);
 
+void relaxandspendtime(){
+}
+
 /* Reader thread function */
 void *reader_thread(void *arg)
 {
