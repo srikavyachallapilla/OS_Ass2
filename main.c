@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     int num_readers = atoi(argv[1]);
     
     /* Check input */
-    if (num_readers < 1 || num_readers > NUM_READERS_MAX) {
+    if (num_readers < 1 || num_readers > MAX_NUM_READERS) {
         fprintf(stderr, "Error: invalid number of readers (1-%d)\n", MAX_NUM_READERS);
         exit(1);
     }
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     sem_init(&writeSem, 0, 1);
     
     /* Create threads */
-    pthread_t readers[num_readers], writer[NUM_WRITERS];
+    pthread_t readers[num_readers], writer[NUM_WRITES];
     pthread_attr_t attr;
     pthread_attr_init(&attr);
     pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
