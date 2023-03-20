@@ -3,119 +3,119 @@
 #include <pthread.h>
 #include <semaphore.h>
 
-#define MAX_NUM_READERS 14
-#define MAX_NUM_WRITERS 1
-#define NUM_READS 250000000
-#define NUM_WRITES 25000
+#define MAX_READERS 14
 
-/* Shared variables */
+// shared counter variable
 int counter = 0;
-int in_cs = 0; /* flag indicating if writer is in critical section */
-sem_t readSem, writeSem; /* semaphores */
 
-/* Function prototypes */
-void *reader_thread(void *arg);
-void *writer_thread(void *arg);
+// semaphore for readers
+sem_t read_sem;
 
-void relaxandspendtime(){
+// semaphore for writers
+sem_t write_sem;
+
+// flag to indicate if writer is in critical section
+int in_cs = 0;
+
+void relaxandspendtime()
+{
 int i;
-    for(i = 0; i < 250000000; i++) i=i;
+for(i = 0; i < 250000000; i++) i=i;
 }
 
-/* Reader thread function */
-void *reader_thread(void *arg)
-{
-    int id = (int) arg;
-    int i;
-    for (i = 0; i < NUM_READS; i++) {
-        /* Enter critical section */
-        sem_wait(&readSem);
+// function for readers
+void* reader(void* arg) {
+    int id = *(int*)arg;
+    free(arg);
+
+    for (int i = 0; i < 250000000; i++) {
+        // acquire reader semaphore
+        sem_wait(&read_sem);
+
+        // check if writer is in critical section
         if (in_cs) {
-            fprintf(stderr, "Error: reader %d detected writer in critical section\n", id);
+            printf("Reader %d error: writer in critical section\n", id);
         }
-        sem_post(&readSem);
-        
-        /* Read shared variable */
+
+        // read shared counter
         int val = counter;
-        
-        /* Exit critical section */
-        sem_wait(&readSem);
-        sem_post(&readSem);
-        
-        /* Relax */
+
+        // release reader semaphore
+        sem_post(&read_sem);
+
+        // relax and spend time
         relaxandspendtime();
     }
+
     printf("Reader %d done\n", id);
     return NULL;
 }
 
-/* Writer thread function */
-void *writer_thread(void *arg)
-{
-    int i;
-    for (i = 0; i < NUM_WRITES; i++) {
-        /* Enter critical section */
-        sem_wait(&writeSem);
+// function for writer
+void* writer(void* arg) {
+    for (int i = 0; i < 25000; i++) {
+        // acquire writer semaphore
+        sem_wait(&write_sem);
+
+        // set flag to indicate writer is in critical section
         in_cs = 1;
-        
-        /* Write shared variable */
+
+        // update shared counter
         counter++;
-        
-        /* Exit critical section */
+
+        // reset flag to indicate writer is leaving critical section
         in_cs = 0;
-        sem_post(&writeSem);
-        
-        /* Relax */
+
+        // release writer semaphore
+        sem_post(&write_sem);
+
+        // relax and spend time
         relaxandspendtime();
     }
+
     printf("Writer done\n");
     return NULL;
 }
 
-/* Main function */
-int main(int argc, char *argv[])
-{
-    int i, k;
-    int num_readers = atoi(argv[1]);
-    
-    /* Check input */
-    if (num_readers < 1 || num_readers > MAX_NUM_READERS) {
-        fprintf(stderr, "Error: invalid number of readers (1-%d)\n", MAX_NUM_READERS);
-        exit(1);
+int main(int argc, char* argv[]) {
+    // get number of readers from command line argument
+    int n_readers = atoi(argv[1]);
+    if (n_readers < 1) {
+        fprintf(stderr, "Invalid number of readers\n");
+        return 1;
     }
-    
-    /* Initialize semaphores */
-    sem_init(&readSem, 0, 1);
-    sem_init(&writeSem, 0, 1);
-    
-    /* Create threads */
-    pthread_t readers[num_readers], writer[NUM_WRITES];
-    pthread_attr_t attr;
-    pthread_attr_init(&attr);
-    pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_JOINABLE);
-    
-    /* Start readers */
-    k = num_readers / 2;
-    for (i = 0; i < k; i++) {
-        pthread_create(&readers[i], &attr, reader_thread, (void*) i);
+    if (n_readers > MAX_READERS) {
+        fprintf(stderr, "Too many readers\n");
+        return 1;
     }
-    /* Start writer */
-    pthread_create(&writer[0], &attr, writer_thread, NULL);
-    /* Start remaining readers */
-    for (i = k; i < num_readers; i++) {
-        pthread_create(&readers[i], &attr, reader_thread, (void*) i);
+
+    // initialize semaphores
+    sem_init(&read_sem, 0, MAX_READERS);
+    sem_init(&write_sem, 0, 1);
+
+    // create reader threads
+    pthread_t reader_threads[n_readers];
+    for (int i = 0; i < n_readers; i++) {
+        int* id = malloc(sizeof(int));
+        *id = i;
+        pthread_create(&reader_threads[i], NULL, reader, id);
     }
-    
-    /* Wait for threads to finish */
-    for (i = 0; i < num_readers; i++) {
-        pthread_join(readers[i], NULL);
+
+    // start writer thread
+    pthread_t writer_thread;
+    pthread_create(&writer_thread, NULL, writer, NULL);
+
+    // join reader threads
+    for (int i = 0; i < n_readers; i++) {
+        pthread_join(reader_threads[i], NULL);
     }
-    pthread_join(writer[0], NULL);
-    
-    /* Cleanup */
-    pthread_attr_destroy(&attr);
-    sem_destroy(&readSem);
-    sem_destroy(&writeSem);
-    
+
+    // join writer thread
+    pthread_join(writer_thread, NULL);
+
+    // destroy semaphores
+    sem_destroy(&read_sem);
+    sem_destroy(&write_sem);
+
     return 0;
 }
