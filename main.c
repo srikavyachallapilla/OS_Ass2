@@ -47,7 +47,7 @@ void* reader(void* arg) {
         // relax and spend time
         relaxandspendtime();
     
-    if(val > = max_counter){
+    if(val >= max_counter){
     printf("Reader %d done\n", id);
     return NULL;}}
 }
