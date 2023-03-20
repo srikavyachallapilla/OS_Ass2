@@ -9,11 +9,11 @@
 
 int counter = 0;
 
-int max_counter = 250000000;
+int max_read = 250000000;
 
 //declaring two semaphores for read and write
-sem_t read_sem;
-sem_t write_sem;
+sem_t reader_sem;
+sem_t writer_sem;
 
 //flag indicating if writer is in critical section 
 int in_cs = 0; 
@@ -26,12 +26,13 @@ void relax_and_spend_time() {
     }
 }
 
+//reader function
 void* reader(void* arg) {
     int id = (int)arg;
 
-    for (int i = 0; i < max_counter; i++) {
+    for (int i = 0; i < max_read; i++) {
         // acquire reader semaphore
-        sem_wait(&read_sem);
+        sem_wait(&reader_sem);
 
         // check if writer is in critical section
         if (in_cs) {
@@ -42,28 +43,31 @@ void* reader(void* arg) {
         int val = counter;
 
         // release reader semaphore
-        sem_post(&read_sem);
+        sem_post(&reader_sem);
 
-        // relax and spend time
+        // calling relax and spend time method
         relax_and_spend_time();
 
-        if (val >= max_counter) {
+        if (val >= max_read) {
             printf("Reader %d done\n", id);
             return NULL;
         }
     }
 }
 
+
+
+//writer function
 void* writer(void* arg) {
     while(1) {
         // acquire writer semaphore
-        sem_wait(&write_sem);
-
+        sem_wait(&writer_sem);
+        
         // set flag to indicate writer is in critical section
         in_cs = 1;
 
-        // update shared counter
-        for (int i = 0; i < max_counter; i++) {
+        // shared counter update
+        for (int i = 0; i < max_read; i++) {
             counter++;
         }
 
@@ -71,7 +75,7 @@ void* writer(void* arg) {
         in_cs = 0;
 
         // release writer semaphore
-        sem_post(&write_sem);
+        sem_post(&writer_sem);
 
         printf("Writer done\n");
         return NULL;
@@ -80,23 +84,23 @@ void* writer(void* arg) {
 
 int main(int argc, char* argv[]) {
     // get number of readers from command line argument
-    int n_readers = atoi(argv[1]);
-    if (n_readers < 1) {
+    int num_readers = atoi(argv[1]);
+    if (num_readers < 1) {
         fprintf(stderr, "Invalid number of readers\n");
         return 1;
     }
-    if (n_readers > MAX_READERS) {
+    if (num_readers > MAX_READERS) {
         fprintf(stderr, "Too many readers\n");
         return 1;
     }
 
     // initialize semaphores
-    sem_init(&read_sem, 0, 1);
-    sem_init(&write_sem, 0, 1);
+    sem_init(&reader_sem, 0, 1);
+    sem_init(&writer_sem, 0, 1);
 
     // create reader threads
     pthread_t reader_threads[MAX_READERS];
-    for (int i = 0; i < n_readers; i++) {
+    for (int i = 0; i < num_readers; i++) {
         int id=0;
         id = i;
         pthread_create(&reader_threads[i], NULL, reader, id);
@@ -107,7 +111,7 @@ int main(int argc, char* argv[]) {
     pthread_create(&writer_thread, NULL, writer, NULL);
 
     // join reader threads
-    for (int i = 0; i < n_readers; i++) {
+    for (int i = 0; i < num_readers; i++) {
         pthread_join(reader_threads[i], NULL);
     }
 
@@ -115,7 +119,7 @@ int main(int argc, char* argv[]) {
     pthread_join(writer_thread, NULL);
 
     // destroy semaphores
-    sem_destroy(&read_sem);
-    sem_destroy(&write_sem);
+    sem_destroy(&reader_sem);
+    sem_destroy(&writer_sem);
 return 0;
 }
