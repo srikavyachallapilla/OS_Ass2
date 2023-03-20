@@ -18,6 +18,8 @@ void *reader_thread(void *arg);
 void *writer_thread(void *arg);
 
 void relaxandspendtime(){
+int i;
+    for(i = 0; i < 250000000; i++) i=i;
 }
 
 /* Reader thread function */
