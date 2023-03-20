@@ -108,7 +108,7 @@ int main(int argc, char* argv[]) {
     pthread_join(writer_thread, NULL);
 
     // destroy semaphores
-sem_destroy(&read_sem);
-sem_destroy(&write_sem);    
+    sem_destroy(&read_sem);
+    sem_destroy(&write_sem);
 return 0;
 }
