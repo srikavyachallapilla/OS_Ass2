@@ -1,17 +1,24 @@
+//including library functions
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
 
+//defining macros
 #define MAX_READERS 14
 
 int counter = 0;
+
 int max_counter = 250000000;
 
+//declaring two semaphores for read and write
 sem_t read_sem;
 sem_t write_sem;
-int in_cs = 0;
 
+//flag indicating if writer is in critical section 
+int in_cs = 0; 
+
+//waits for a fixed time 
 void relax_and_spend_time() {
     int i;
     for (i = 0; i < 250000000; i++) {
