@@ -29,7 +29,7 @@ void* reader(void* arg) {
     int id = *(int*)arg;
     
 
-    for (int i = 0; i > =0; i++) {
+    for (int i = 0; i >= 0; i++) {
         // acquire reader semaphore
         sem_wait(&read_sem);
 
@@ -54,7 +54,7 @@ void* reader(void* arg) {
 
 // function for writer
 void* writer(void* arg) {
-    for (int i = 0; i >=0; i++) {
+    for (int i = 0; i >= 0; i++) {
         // acquire writer semaphore
         sem_wait(&write_sem);
 
