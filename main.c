@@ -31,6 +31,7 @@ void* reader(void* arg) {
     int id = (int)arg;
 
     for (int i = 0; i < max_read; i++) {
+        //entry section
         // acquire reader semaphore
         sem_wait(&reader_sem);
 
@@ -38,10 +39,12 @@ void* reader(void* arg) {
         if (in_cs) {
             printf("Reader %d error: writer in critical section\n", id);
         }
-
+        
+        //critical section
         // read shared counter
         int val = counter;
-
+        
+        //exit section
         // release reader semaphore
         sem_post(&reader_sem);
 
@@ -52,6 +55,7 @@ void* reader(void* arg) {
             printf("Reader %d done\n", id);
             return NULL;
         }
+        //remainder section
     }
 }
 
@@ -60,9 +64,11 @@ void* reader(void* arg) {
 //writer function
 void* writer(void* arg) {
     while(1) {
+        //entry section
         // acquire writer semaphore
         sem_wait(&writer_sem);
         
+        //critical section
         // set flag to indicate writer is in critical section
         in_cs = 1;
 
@@ -73,10 +79,12 @@ void* writer(void* arg) {
 
         // reset flag to indicate writer is leaving critical section
         in_cs = 0;
-
+        
+        //exit section
         // release writer semaphore
         sem_post(&writer_sem);
-
+        
+        //remainder section
         printf("Writer done\n");
         return NULL;
     }
@@ -94,7 +102,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    // initialize semaphores
+    // semaphores initialization
     sem_init(&reader_sem, 0, 1);
     sem_init(&writer_sem, 0, 1);
 
