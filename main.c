@@ -90,8 +90,8 @@ int main(int argc, char* argv[]) {
     // create reader threads
     pthread_t reader_threads[MAX_READERS];
     for (int i = 0; i < n_readers; i++) {
-        int* id = malloc(sizeof(int));
-        *id = i;
+        int id=0;
+        id = i;
         pthread_create(&reader_threads[i], NULL, reader, id);
     }
 
