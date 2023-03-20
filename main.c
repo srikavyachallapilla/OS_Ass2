@@ -109,6 +109,6 @@ int main(int argc, char* argv[]) {
 
     // destroy semaphores
 sem_destroy(&read_sem);
-    sem_destroy(&write_sem);    
- return 0;
+sem_destroy(&write_sem);    
+return 0;
 }
