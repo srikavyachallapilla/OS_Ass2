@@ -7,6 +7,7 @@
 
 // shared counter variable
 int counter = 0;
+int max_counter = 250000000;
 
 // semaphore for readers
 sem_t read_sem;
@@ -26,9 +27,9 @@ for(i = 0; i < 250000000; i++) i=i;
 // function for readers
 void* reader(void* arg) {
     int id = *(int*)arg;
-    free(arg);
+    
 
-    for (int i = 0; i < 250000000; i++) {
+    for (int i = 0; i > =0; i++) {
         // acquire reader semaphore
         sem_wait(&read_sem);
 
@@ -45,15 +46,15 @@ void* reader(void* arg) {
 
         // relax and spend time
         relaxandspendtime();
-    }
-
+    
+    if(val > = max_counter){
     printf("Reader %d done\n", id);
-    return NULL;
+    return NULL;}}
 }
 
 // function for writer
 void* writer(void* arg) {
-    for (int i = 0; i < 25000; i++) {
+    for (int i = 0; i >=0; i++) {
         // acquire writer semaphore
         sem_wait(&write_sem);
 
@@ -61,7 +62,7 @@ void* writer(void* arg) {
         in_cs = 1;
 
         // update shared counter
-        counter++;
+        for (int i = 0; i < 25000; i++) counter++;
 
         // reset flag to indicate writer is leaving critical section
         in_cs = 0;
@@ -69,12 +70,10 @@ void* writer(void* arg) {
         // release writer semaphore
         sem_post(&write_sem);
 
-        // relax and spend time
-        relaxandspendtime();
-    }
+    
 
     printf("Writer done\n");
-    return NULL;
+    return NULL;}
 }
 
 int main(int argc, char* argv[]) {
