@@ -2,7 +2,6 @@
 
 
 
-
 //including library functions
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,7 +22,13 @@ sem_t writer_sem;
 //flag indicating if writer is in critical section 
 int in_cs = 0; 
 
-
+//waits for a fixed time 
+/*void relax_and_spend_time() {
+    int i;
+    for (i = 0; i < 250000000; i++) {
+        // do nothing
+    }
+}*/
 
 //reader function
 void* reader(void* arg) {
@@ -47,8 +52,8 @@ void* reader(void* arg) {
         // release reader semaphore
         sem_post(&reader_sem);
 
-       
-        for (i = 0; i < 250000000; i++) printf("Reader %d is reading\n", id);
+        // calling relax and spend time method
+        //relax_and_spend_time();
 
         if (val >= max_read) {
             printf("Reader %d done\n", id);
