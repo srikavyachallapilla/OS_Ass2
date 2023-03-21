@@ -55,6 +55,7 @@ void* reader(void* arg) {
 
         // calling relax and spend time method
         //relax_and_spend_time();
+        for (i = 0; i < 250000000; i++) printf("Reader %d is reading\n", id);
 
         if (val >= max_read) {
             printf("Reader %d done\n", id);
