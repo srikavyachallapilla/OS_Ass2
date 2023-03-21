@@ -69,7 +69,7 @@ void *writer_thread(void *args){
     for (int i = 0; i < 25000; i++) {
         //ENTRY SECTION//
 
-        sem_wait(&writerSemaphore);/incrementing the writer semaphore variable i.e setting lock/
+        sem_wait(&writerSemaphore);//incrementing the writer semaphore variable i.e setting lock/
         // as per the question given setting the flag variable to 1 to allow writer to the critical section//
         in_cs = 1;
         //CRITICAL SECTION//
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
         sem_destroy(&readerSemaphore);
         sem_destroy(&writerSemaphore);
     }
-    /printing the statement if the input enter is greater than 14/
+    //printing the statement if the input enter is greater than 14/
     else{
         printf("number of readers must be less than or equal to 14");
     }
