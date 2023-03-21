@@ -23,12 +23,12 @@ sem_t writer_sem;
 int in_cs = 0; 
 
 //waits for a fixed time 
-void relax_and_spend_time() {
+/*void relax_and_spend_time() {
     int i;
     for (i = 0; i < 250000000; i++) {
         // do nothing
     }
-}
+}*/
 
 //reader function
 void* reader(void* arg) {
