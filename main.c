@@ -53,7 +53,7 @@ void* reader(void* arg) {
         sem_post(&reader_sem);
 
         // calling relax and spend time method
-        relax_and_spend_time();
+       // relax_and_spend_time();
 
         if (val >= max_read) {
             printf("Reader %d done\n", id);
